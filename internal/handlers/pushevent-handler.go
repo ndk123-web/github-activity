@@ -14,7 +14,7 @@ import (
 
 type GitHandler interface {
 	GetAllResponseObjects() error
-	GetResponseRepoWise(limit int64) error
+	GetResponseRepoWise(limit int64, data []models.GitResponseObject) error
 }
 
 type gitHandler struct {
@@ -59,35 +59,14 @@ func (g *gitHandler) GetAllResponseObjects() error {
 	return nil
 }
 
-func (g *gitHandler) GetResponseRepoWise(limit int64) error {
-	if g.url == "" {
-		return customerror.Wrap("Username Not Exist / Provide Username", errors.New("Username Not Exist / Provide Username"))
-	}
-
-	url := g.url
-
-	response, err := http.Get(url)
-	if err != nil {
-		return customerror.Wrap("http get failed", err)
-	}
-
-	// close client socket
-	defer response.Body.Close()
-
-	data, err := io.ReadAll(response.Body)
-	if err != nil {
-		return customerror.Wrap("reading response body failed", err)
-	}
-
-	var jsonData []models.GitResponseObject
-	if err := json.Unmarshal(data, &jsonData); err != nil {
-		return customerror.Wrap("json unmarshal failed", err)
-	}
+func (g *gitHandler) GetResponseRepoWise(limit int64, jsonData []models.GitResponseObject) error {
 
 	pushEventService := services.NewPushEventsService(jsonData)
 
 	mapp, err := pushEventService.GetPushEventsRepoWise(limit)
-	// customerror.Wrap("Issue In GetPushEventRepoWise Handler", errors.New("Error In GetPushEventRepoWise Handler"))
+	if err != nil {
+		return customerror.Wrap("Issue In GetPushEventRepoWise Handler", err)
+	}
 
 	for repo, pushcnt := range mapp {
 		fmt.Printf("- Total Push On Repository: %s is %v\n", repo, pushcnt)

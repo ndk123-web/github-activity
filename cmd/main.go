@@ -1,14 +1,19 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+
+	// "io"
+	// "net/http"
 	"os"
 	"strconv"
 
-	"errors"
-
+	// "encoding/json"
 	customerror "github.com/ndk123-web/github-activity/internal/custom-error"
+	"github.com/ndk123-web/github-activity/internal/github"
 	"github.com/ndk123-web/github-activity/internal/handlers"
+	// "github.com/ndk123-web/github-activity/internal/models"
 )
 
 func main() {
@@ -49,6 +54,11 @@ func main() {
 	// get the user url
 	url := fmt.Sprintf("https://api.github.com/users/%s/events", username)
 
+	jsonData, err := github.FetchGitHubApiData(url)
+	if err != nil {
+		fmt.Println(customerror.Wrap("Json Issue", err))
+	}
+
 	for key, value := range mapp {
 		switch key {
 		case "--push":
@@ -69,7 +79,7 @@ func main() {
 				// create handler
 				git_handler := handlers.NewGitHandler(url)
 				git_handler.GetAllResponseObjects()
-				git_handler.GetResponseRepoWise(intLimit)
+				git_handler.GetResponseRepoWise(intLimit, jsonData)
 			}
 		}
 	}
