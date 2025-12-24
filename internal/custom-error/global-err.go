@@ -1,11 +1,10 @@
 package customerror
 
-import (
-	"fmt"
-)
+import "fmt"
 
-func GlobalError(err *error) {
-	if *err != nil {
-		fmt.Println("\nError: ", (*err).Error())
+func Wrap(context string, err error) error {
+	if err == nil {
+		return nil
 	}
+	return fmt.Errorf("%s: %w", context, err)
 }
