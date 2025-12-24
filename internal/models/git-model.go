@@ -3,7 +3,7 @@ package models
 import "time"
 
 type ActorModel struct {
-	Id           string `json:"id"`
+	Id           int64  `json:"id"`
 	Login        string `json:"login"`
 	DisplayLogin string `json:"display_login"`
 	GravatarId   string `json:"gravatar_id"`
@@ -12,15 +12,15 @@ type ActorModel struct {
 }
 
 type RepoModel struct {
-	Id   string `json:"id"`
+	Id   int64  `json:"id"`
 	Name string `json:"name"`
 	Url  string `json:"url"`
 }
 
 type PayloadModel struct {
-	RepositoryId string `json:"repository_id"`
+	RepositoryId int64  `json:"repository_id"`
 	Ref          string `json:"ref"`
-	PushId       string `json:"push_id"`
+	PushId       int64  `json:"push_id"`
 	Head         string `json:"head"`
 	Before       string `json:"before"`
 }
