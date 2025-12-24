@@ -14,7 +14,7 @@ import (
 
 type GitHandler interface {
 	GetAllResponseObjects() error
-	GetPerfectAnswer() error
+	GetResponseRepoWise(limit int64) error
 }
 
 type gitHandler struct {
@@ -22,7 +22,6 @@ type gitHandler struct {
 }
 
 func (g *gitHandler) GetAllResponseObjects() error {
-	pushEventService := services.NewPushEventsService()
 
 	if g.url == "" {
 		return customerror.Wrap("Username Not Exist / Provide Username", errors.New("Username Not Exist / Provide Username"))
@@ -47,8 +46,9 @@ func (g *gitHandler) GetAllResponseObjects() error {
 	if err := json.Unmarshal(data, &jsonData); err != nil {
 		return customerror.Wrap("json unmarshal failed", err)
 	}
+	pushEventService := services.NewPushEventsService(jsonData)
 
-	totalPushEvents, err := pushEventService.GetTotalPushEvents(jsonData)
+	totalPushEvents, err := pushEventService.GetTotalPushEvents()
 	if err != nil {
 		return customerror.Wrap("counting push events failed", err)
 	}
@@ -59,7 +59,40 @@ func (g *gitHandler) GetAllResponseObjects() error {
 	return nil
 }
 
-func (g *gitHandler) GetPerfectAnswer() error {
+func (g *gitHandler) GetResponseRepoWise(limit int64) error {
+	if g.url == "" {
+		return customerror.Wrap("Username Not Exist / Provide Username", errors.New("Username Not Exist / Provide Username"))
+	}
+
+	url := g.url
+
+	response, err := http.Get(url)
+	if err != nil {
+		return customerror.Wrap("http get failed", err)
+	}
+
+	// close client socket
+	defer response.Body.Close()
+
+	data, err := io.ReadAll(response.Body)
+	if err != nil {
+		return customerror.Wrap("reading response body failed", err)
+	}
+
+	var jsonData []models.GitResponseObject
+	if err := json.Unmarshal(data, &jsonData); err != nil {
+		return customerror.Wrap("json unmarshal failed", err)
+	}
+
+	pushEventService := services.NewPushEventsService(jsonData)
+
+	mapp, err := pushEventService.GetPushEventsRepoWise(limit)
+	// customerror.Wrap("Issue In GetPushEventRepoWise Handler", errors.New("Error In GetPushEventRepoWise Handler"))
+
+	for repo, pushcnt := range mapp {
+		fmt.Printf("- Total Push On Repository: %s is %v\n", repo, pushcnt)
+	}
+
 	return nil
 }
 

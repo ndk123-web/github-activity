@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"errors"
+
 	customerror "github.com/ndk123-web/github-activity/internal/custom-error"
 	"github.com/ndk123-web/github-activity/internal/handlers"
 )
@@ -24,7 +26,6 @@ func main() {
 
 	var cmd string
 	var data string
-
 	for idx, str := range args {
 		if idx > 0 && idx%2 == 1 {
 			// these are commands
@@ -45,10 +46,31 @@ func main() {
 		fmt.Println(customerror.Wrap("Please Provide Valid Username", errors.New("Username Not Exist")).Error())
 	}
 
-	// get the user url 
+	// get the user url
 	url := fmt.Sprintf("https://api.github.com/users/%s/events", username)
 
-	// create handler 
-	git_handler := handlers.NewGitHandler(url)
-	git_handler.GetAllResponseObjects()
+	for key, value := range mapp {
+		switch key {
+		case "--push":
+			{
+				// logic for push limit
+				limit := value
+				var intLimit int64
+				var err error
+				if limit != "" {
+					intLimit, err = strconv.ParseInt(limit, 10, 64)
+					if err != nil {
+						fmt.Println(customerror.Wrap("Please Enter Right Limit", errors.New("Limit is Not Integer")).Error())
+					}
+				} else {
+					intLimit = 2
+				}
+
+				// create handler
+				git_handler := handlers.NewGitHandler(url)
+				git_handler.GetAllResponseObjects()
+				git_handler.GetResponseRepoWise(intLimit)
+			}
+		}
+	}
 }
