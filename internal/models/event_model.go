@@ -23,6 +23,7 @@ type PayloadModel struct {
 	PushId       int64  `json:"push_id"`
 	Head         string `json:"head"`
 	Before       string `json:"before"`
+	Action       string `json:"action"`
 }
 
 type GitResponseObject struct {

@@ -66,20 +66,20 @@ func main() {
 			// process flags if any
 			if len(os.Args) > 4 {
 
-				// verify that each flag have data or not
+				// verify that each flag has an accompanying value
 				if (len(os.Args)-4)%2 != 0 {
 					fmt.Println(customerror.Wrap("Some Flag Data Missing", errors.New("Flag Data Missing Error")))
 					return
 				}
 
-				// then process each flag
-				for i := 4; i < len(os.Args); i++ {
-					currentFlag := os.Args[4]
+				// process flags as pairs: flag then value
+				for i := 4; i < len(os.Args); i += 2 {
+					currentFlag := os.Args[i]
 					if !github.IsValidFlag(currentFlag, rules[currentScope][currentCommand]) {
-						fmt.Println(customerror.Wrap(fmt.Sprintf("Invalid Flag For %s", currentCommand), errors.New(fmt.Sprintf("Invalid Flag %s", currentFlag))))
+						fmt.Println(customerror.Wrap(fmt.Sprintf("Invalid Flag For %s", currentCommand), fmt.Errorf(fmt.Sprintf("Invalid Flag %s", currentFlag))))
+						return
 					}
 					flags[currentFlag] = os.Args[i+1]
-					i++
 				}
 			}
 
@@ -108,7 +108,40 @@ func main() {
 			case "pulls":
 				{
 					pull_handler := handlers.NewPullHandler(url)
+
+					// process limit flag
+					var limit int64 = 0 // default value
+
+					if l, ok := flags["--limit"]; ok {
+						limit, err = strconv.ParseInt(l, 10, 64)
+						if err != nil {
+							fmt.Println(customerror.Wrap("Limit Flag Parsing Issue", err))
+							return
+						}
+					}
+
+					// set default limit if limit is zero
+					if limit == 0 {
+						limit = 2
+					}
+
+					// process state flag
+					// state := "all" // default value
+
+					// its mandatory to provide state flag now
+					if _, ok := flags["--state"]; !ok {
+						fmt.Println(customerror.Wrap("State Flag Missing", errors.New("State Flag Missing Error")))
+						return
+					}
+					state := flags["--state"]
+
 					err := pull_handler.GetAllPullRequests(jsonData)
+					if err != nil {
+						fmt.Println(customerror.Wrap("Pull Handler Issue", err))
+						return
+					}
+
+					err = pull_handler.GetPullRequestRepoWise(limit, state, jsonData)
 					if err != nil {
 						fmt.Println(customerror.Wrap("Pull Handler Issue", err))
 						return
