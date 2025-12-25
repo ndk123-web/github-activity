@@ -45,6 +45,7 @@ func (g *gitHandler) GetResponseRepoWise(limit int64, jsonData []models.GitRespo
 		return customerror.Wrap("Issue In GetPushEventRepoWise Handler", err)
 	}
 
+	// fmt.Println("Output")
 	for repo, pushcnt := range mapp {
 		fmt.Printf("- Total Push On Repository: %s is %v\n", repo, pushcnt)
 	}

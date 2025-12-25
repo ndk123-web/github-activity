@@ -5,19 +5,13 @@ import (
 	"fmt"
 	"strconv"
 
-	// "io"
-	// "net/http"
 	"os"
-	// "strconv"
 
-	// "encoding/json"
 	customerror "github.com/ndk123-web/github-activity/internal/custom-error"
 	"github.com/ndk123-web/github-activity/internal/github"
 	"github.com/ndk123-web/github-activity/internal/handlers"
 	"github.com/ndk123-web/github-activity/internal/models"
-	// "google.golang.org/grpc/benchmark/flags"
-	// "github.com/ndk123-web/github-activity/internal/handlers"
-	// "github.com/ndk123-web/github-activity/internal/models"
+	// "golang.org/x/text/cases"
 )
 
 func main() {
@@ -110,6 +104,15 @@ func main() {
 
 					push_handler.GetAllResponseObjects(jsonData)
 					push_handler.GetResponseRepoWise(limit, jsonData)
+				}
+			case "pulls":
+				{
+					pull_handler := handlers.NewPullHandler(url)
+					err := pull_handler.GetAllPullRequests(jsonData)
+					if err != nil {
+						fmt.Println(customerror.Wrap("Pull Handler Issue", err))
+						return
+					}
 				}
 			default:
 				{
