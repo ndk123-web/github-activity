@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"encoding/json"
-	"errors"
+	// "encoding/json"
+	// "errors"
 	"fmt"
-	"io"
-	"net/http"
+	// "io"
+	// "net/http"
 
 	customerror "github.com/ndk123-web/github-activity/internal/custom-error"
 	"github.com/ndk123-web/github-activity/internal/models"
@@ -13,7 +13,7 @@ import (
 )
 
 type GitHandler interface {
-	GetAllResponseObjects() error
+	GetAllResponseObjects(jsonData []models.GitResponseObject) error
 	GetResponseRepoWise(limit int64, data []models.GitResponseObject) error
 }
 
@@ -21,31 +21,8 @@ type gitHandler struct {
 	url string
 }
 
-func (g *gitHandler) GetAllResponseObjects() error {
+func (g *gitHandler) GetAllResponseObjects(jsonData []models.GitResponseObject) error {
 
-	if g.url == "" {
-		return customerror.Wrap("Username Not Exist / Provide Username", errors.New("Username Not Exist / Provide Username"))
-	}
-
-	url := g.url
-
-	response, err := http.Get(url)
-	if err != nil {
-		return customerror.Wrap("http get failed", err)
-	}
-
-	// close client socket
-	defer response.Body.Close()
-
-	data, err := io.ReadAll(response.Body)
-	if err != nil {
-		return customerror.Wrap("reading response body failed", err)
-	}
-
-	var jsonData []models.GitResponseObject
-	if err := json.Unmarshal(data, &jsonData); err != nil {
-		return customerror.Wrap("json unmarshal failed", err)
-	}
 	pushEventService := services.NewPushEventsService(jsonData)
 
 	totalPushEvents, err := pushEventService.GetTotalPushEvents()
