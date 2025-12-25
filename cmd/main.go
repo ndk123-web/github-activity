@@ -29,6 +29,11 @@ func main() {
 	// scopeUser := false
 	// scopeRepo := false
 
+	if len(os.Args) < 4 {
+		fmt.Println(customerror.Wrap("Insufficient Arguments", errors.New("Insufficient Arguments Error")))
+		return
+	}
+
 	// command -> gh-activity user username command options
 	currentScope := os.Args[1]
 
