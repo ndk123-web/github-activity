@@ -154,6 +154,38 @@ func main() {
 						return
 					}
 				}
+			case "issues":
+				{
+					// check the flags
+					// flags that are possible --limit and --state
+					// where limit is default 2 and state is mandatory
+					if _, ok := flags["--state"]; !ok {
+						fmt.Println(customerror.Wrap("State Flag Missing", errors.New("State Flag Missing Error")))
+						return
+					}
+
+					// state := flags["--state"]
+
+					var limit int64 = 0 // default value
+					if l, ok := flags["--limit"]; ok {
+						limit, err = strconv.ParseInt(l, 10, 64)
+						if err != nil {
+							fmt.Println(customerror.Wrap("Limit Flag Parsing Issue", err))
+							return
+						}
+					}
+
+					// set default limit if limit is zero
+					if limit == 0 {
+						limit = 2
+					}
+
+					issue_handler := handlers.NewIssueEventHandler(url)
+					if err := issue_handler.GetAllIssueEvents(jsonData); err != nil {
+						fmt.Println(customerror.Wrap("Issue Handler Issue", err))
+						return
+					}
+				}
 			default:
 				{
 					fmt.Println(customerror.Wrap("Command Not Implemented", errors.New("Command Not Implemented")))

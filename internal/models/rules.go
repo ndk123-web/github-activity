@@ -5,7 +5,7 @@ func Rules() map[string]map[string][]string {
 		"user": {
 			"pushes": {"--limit"},
 			"pulls":  {"--limit", "--state"},
-			"issues": {"--state"},
+			"issues": {"--limit", "--state"},
 		},
 		"repo": {
 			"info": {},
