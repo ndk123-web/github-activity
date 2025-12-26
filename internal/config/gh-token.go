@@ -45,9 +45,28 @@ func LoadGhToken() (string, error) {
 	var cfg GhTokenConfig
 	data, err := os.ReadFile(path)
 
+	if err != nil {
+		return "", err
+	}
+
 	if err = json.Unmarshal(data, &cfg); err != nil {
 		return "", err
 	}
+
+	// fmt.Println("Created At: ", cfg.CreatedAt)
+
+	if cfg.CreatedAt.IsZero() {
+		fmt.Println("- Warning: Token creation time missing. Please reset token.")
+		return cfg.Token, nil
+	} else {
+		// fmt.Println("- GitHub Token was set on:", cfg.CreatedAt.Format("2006-01-02 15:04:05"))
+
+		if time.Since(cfg.CreatedAt) > 90*24*time.Hour {
+			fmt.Println("- Warning: GitHub Token is older than 90 days. Consider updating it for better security.")
+		}
+	}
+
+	GhToken = cfg.Token
 
 	return cfg.Token, nil
 }
