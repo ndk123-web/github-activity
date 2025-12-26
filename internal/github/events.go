@@ -27,11 +27,13 @@ func FetchGitHubApiData(url string) ([]models.GitResponseObject, error) {
 	token, err := config.LoadGhToken()
 
 	if err != nil {
-		fmt.Println("- Using GitHub Token for authentication.")
+		fmt.Println("Error loading GitHub Token")
 	}
 	if token != "" {
 		IsUsingGhToken = true
 		fmt.Println("- Using GitHub Token for authentication.")
+	} else {
+		fmt.Println("- No GitHub Token found. Proceeding without authentication.")
 	}
 
 	client := &http.Client{}

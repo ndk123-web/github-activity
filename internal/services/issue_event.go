@@ -38,6 +38,10 @@ func (s *issueEventService) GetIssueByState(state string, limit int64) (map[stri
 			if issueState == state {
 				result[item.Repo.Name]++
 			}
+			limit--
+		}
+		if limit < 0 {
+			break 
 		}
 	}
 

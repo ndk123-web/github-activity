@@ -89,6 +89,7 @@ func main() {
 				{
 					push_handler := handlers.NewGitHandler(url)
 					var limit int64 = 0 // default value
+					limitProvided := false
 
 					if l, ok := flags["--limit"]; ok {
 						limit, err = strconv.ParseInt(l, 10, 64)
@@ -96,11 +97,16 @@ func main() {
 							fmt.Println(customerror.Wrap("Limit Flag Parsing Issue", err))
 							return
 						}
+						limitProvided = true
 					}
 
 					// set default limit if limit is zero
 					if limit == 0 {
 						limit = 2
+					}
+
+					if !limitProvided {
+						fmt.Println("🚧 Default limit is 2. To see more, use --limit flag: Example: --limit 20")
 					}
 
 					push_handler.GetAllResponseObjects(jsonData)
@@ -112,6 +118,7 @@ func main() {
 
 					// process limit flag
 					var limit int64 = 0 // default value
+					limitProvided := false
 
 					if l, ok := flags["--limit"]; ok {
 						limit, err = strconv.ParseInt(l, 10, 64)
@@ -119,11 +126,16 @@ func main() {
 							fmt.Println(customerror.Wrap("Limit Flag Parsing Issue", err))
 							return
 						}
+						limitProvided = true
 					}
 
 					// set default limit if limit is zero
 					if limit == 0 {
 						limit = 2
+					}
+
+					if !limitProvided {
+						fmt.Println("🚧 Default limit is 2. To see more, use --limit flag: Example: --limit 20")
 					}
 
 					// process state flag
@@ -167,12 +179,14 @@ func main() {
 					state := flags["--state"]
 
 					var limit int64 = 0 // default value
+					limitProvided := false
 					if l, ok := flags["--limit"]; ok {
 						limit, err = strconv.ParseInt(l, 10, 64)
 						if err != nil {
 							fmt.Println(customerror.Wrap("Limit Flag Parsing Issue", err))
 							return
 						}
+						limitProvided = true
 					}
 
 					// set default limit if limit is zero
@@ -180,6 +194,15 @@ func main() {
 						limit = 2
 					}
 
+					if !limitProvided {
+						fmt.Println("🚧 Default limit is 2. To see more, use --limit flag: Example: --limit 20")
+					}
+
+					if limit > 50 {
+						fmt.Println(customerror.Wrap("Limit Exceeds Maximum", errors.New("Limit cannot be more than 50")))
+						limit = 50
+						fmt.Println("Setting limit to 50")
+					}
 					issue_handler := handlers.NewIssueEventHandler(url)
 					if err := issue_handler.GetAllIssueEvents(jsonData); err != nil {
 						fmt.Println(customerror.Wrap("Issue Handler Issue", err))

@@ -33,7 +33,7 @@ func SetGhToken(token string) {
 	}
 
 	GhToken = token
-	fmt.Println("- GitHub Token has been set successfully.")
+	fmt.Println("✅ GitHub Token has been set successfully.")
 }
 
 func LoadGhToken() (string, error) {
@@ -56,13 +56,12 @@ func LoadGhToken() (string, error) {
 	// fmt.Println("Created At: ", cfg.CreatedAt)
 
 	if cfg.CreatedAt.IsZero() {
-		fmt.Println("- Warning: Token creation time missing. Please reset token.")
+		fmt.Println("⚠️  Warning: Token creation time missing. Please reset token.")
 		return cfg.Token, nil
 	} else {
-		// fmt.Println("- GitHub Token was set on:", cfg.CreatedAt.Format("2006-01-02 15:04:05"))
 
 		if time.Since(cfg.CreatedAt) > 90*24*time.Hour {
-			fmt.Println("- Warning: GitHub Token is older than 90 days. Consider updating it for better security.")
+			fmt.Println("⚠️  Warning: GitHub Token is older than 90 days. Consider updating it for better security.")
 		}
 	}
 

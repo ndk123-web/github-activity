@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/ndk123-web/github-activity/internal/models"
 	"github.com/ndk123-web/github-activity/internal/services"
 )
@@ -23,31 +25,45 @@ func (p *pullHandler) GetAllPullRequests(jsonData []models.GitResponseObject) er
 		return err
 	}
 
-	// fmt.Println("Output")
-	fmt.Printf("- Total Pull Requests: %v\n", totalPullRequests)
+	fmt.Printf("\n🔀 Pull Request Overview\n")
+	fmt.Printf("- Pull Requests: %v total\n", totalPullRequests)
 	return nil
 }
 
 func (p *pullHandler) GetPullRequestRepoWise(limit int64, state string, jsonData []models.GitResponseObject) error {
 	pullEventService := services.NewPullEventService(jsonData)
-	
+
 	if limit == 0 {
 		limit = 2 // default limit
 	}
-	
+
 	mapp, err := pullEventService.GetPullRequestsRepoWise(limit, state)
 
 	if err != nil {
 		return err
 	}
-	// fmt.Println("Output")
+	repoHeader := "REPOSITORY"
+	countHeader := fmt.Sprintf("PULL_REQUESTS (%s)", state)
+	maxRepoLen := len(repoHeader)
+	for repo := range mapp {
+		if len(repo) > maxRepoLen {
+			maxRepoLen = len(repo)
+		}
+	}
+	repoWidth := maxRepoLen
+	countWidth := len(countHeader)
+
+	fmt.Printf("\n%-*s  %*s\n", repoWidth, repoHeader, countWidth, countHeader)
+	fmt.Printf("%s  %s\n", strings.Repeat("-", repoWidth), strings.Repeat("-", countWidth))
 	for repo, prcnt := range mapp {
-		fmt.Printf("- Total Pull Requests that are %s  On Repository: %s is %v\n", state, repo, prcnt)
+		fmt.Printf("%-*s  %*d\n", repoWidth, repo, countWidth, prcnt)
 	}
 
 	if len(mapp) == 0 {
-		fmt.Printf("- No Pull Requests found with state: %s\n", state)
+		fmt.Printf("ℹ️ No Pull Requests found with state: %s\n", state)
 	}
+
+	fmt.Println()
 	return nil
 }
 

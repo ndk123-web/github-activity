@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/ndk123-web/github-activity/internal/models"
 	"github.com/ndk123-web/github-activity/internal/services"
@@ -25,7 +26,8 @@ func (h *issueEventHandler) GetAllIssueEvents(jsonData []models.GitResponseObjec
 		return err
 	}
 
-	fmt.Printf("- Total Issues Events: %d\n", cnt)
+	fmt.Printf("\n🐛 Issue Activity Overview\n")
+	fmt.Printf("- Issue Events: %d total\n", cnt)
 
 	return nil
 }
@@ -37,13 +39,28 @@ func (h *issueEventHandler) GetIssueByState(state string, limit int64, jsonData 
 		return err
 	}
 
+	repoHeader := "REPOSITORY"
+	countHeader := fmt.Sprintf("ISSUES (%s)", state)
+	maxRepoLen := len(repoHeader)
+	for repo := range result {
+		if len(repo) > maxRepoLen {
+			maxRepoLen = len(repo)
+		}
+	}
+	repoWidth := maxRepoLen
+	countWidth := len(countHeader)
+
+	fmt.Printf("\n%-*s  %*s\n", repoWidth, repoHeader, countWidth, countHeader)
+	fmt.Printf("%s  %s\n", strings.Repeat("-", repoWidth), strings.Repeat("-", countWidth))
 	for repo, count := range result {
-		fmt.Printf("- Repo: %s, Issues with state '%s': %d\n", repo, state, count)
+		fmt.Printf("%-*s  %*d\n", repoWidth, repo, countWidth, count)
 	}
 
 	if len(result) == 0 {
-		fmt.Printf("No issues found with state '%s'\n", state)
+		fmt.Printf("ℹ️ No issues found with state '%s'\n", state)
 	}
+
+	fmt.Println()
 
 	return nil
 }
