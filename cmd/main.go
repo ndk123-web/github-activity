@@ -164,7 +164,7 @@ func main() {
 						return
 					}
 
-					// state := flags["--state"]
+					state := flags["--state"]
 
 					var limit int64 = 0 // default value
 					if l, ok := flags["--limit"]; ok {
@@ -182,6 +182,10 @@ func main() {
 
 					issue_handler := handlers.NewIssueEventHandler(url)
 					if err := issue_handler.GetAllIssueEvents(jsonData); err != nil {
+						fmt.Println(customerror.Wrap("Issue Handler Issue", err))
+						return
+					}
+					if err := issue_handler.GetIssueByState(state, limit, jsonData); err != nil {
 						fmt.Println(customerror.Wrap("Issue Handler Issue", err))
 						return
 					}

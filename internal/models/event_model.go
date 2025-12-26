@@ -17,13 +17,18 @@ type RepoModel struct {
 	Url  string `json:"url"`
 }
 
+type IssueModel struct {
+	State string `json:"state"`
+}
+
 type PayloadModel struct {
-	RepositoryId int64  `json:"repository_id"`
-	Ref          string `json:"ref"`
-	PushId       int64  `json:"push_id"`
-	Head         string `json:"head"`
-	Before       string `json:"before"`
-	Action       string `json:"action"`
+	RepositoryId int64      `json:"repository_id"`
+	Ref          string     `json:"ref"`
+	PushId       int64      `json:"push_id"`
+	Head         string     `json:"head"`
+	Before       string     `json:"before"`
+	Action       string     `json:"action"`
+	Issues       IssueModel `json:"issue,omitempty"`
 }
 
 type GitResponseObject struct {

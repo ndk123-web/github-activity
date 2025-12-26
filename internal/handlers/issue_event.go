@@ -9,6 +9,7 @@ import (
 
 type IssueEventHandler interface {
 	GetAllIssueEvents(jsonData []models.GitResponseObject) error
+	GetIssueByState(state string, limit int64, jsonData []models.GitResponseObject) error
 }
 
 type issueEventHandler struct {
@@ -25,6 +26,24 @@ func (h *issueEventHandler) GetAllIssueEvents(jsonData []models.GitResponseObjec
 	}
 
 	fmt.Printf("- Total Issues Events: %d\n", cnt)
+
+	return nil
+}
+
+func (h *issueEventHandler) GetIssueByState(state string, limit int64, jsonData []models.GitResponseObject) error {
+	issueService := services.NewIssueEventService(jsonData)
+	result, err := issueService.GetIssueByState(state, limit)
+	if err != nil {
+		return err
+	}
+
+	for repo, count := range result {
+		fmt.Printf("- Repo: %s, Issues with state '%s': %d\n", repo, state, count)
+	}
+
+	if len(result) == 0 {
+		fmt.Printf("No issues found with state '%s'\n", state)
+	}
 
 	return nil
 }
