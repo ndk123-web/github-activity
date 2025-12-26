@@ -178,6 +178,12 @@ func main() {
 
 					state := flags["--state"]
 
+					// validate state 
+					if state != "open" && state != "closed" {
+						fmt.Println(customerror.Wrap("Invalid State Value", errors.New("State Value Should be one of open, closed")))
+						return
+					}
+
 					var limit int64 = 0 // default value
 					limitProvided := false
 					if l, ok := flags["--limit"]; ok {
