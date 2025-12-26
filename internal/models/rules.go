@@ -10,6 +10,12 @@ func Rules() map[string]map[string][]string {
 		"repo": {
 			"info": {},
 		},
+		"set": {
+			"token": {},
+		},
+		"get": {
+			"token": {},
+		},
 	}
 
 	return rules
@@ -19,6 +25,8 @@ func Scopes() []string {
 	scopes := []string{
 		"user",
 		"repo",
+		"set",
+		"get",
 	}
 
 	return scopes

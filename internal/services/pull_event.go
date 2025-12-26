@@ -1,6 +1,10 @@
 package services
 
-import "github.com/ndk123-web/github-activity/internal/models"
+import (
+	// "fmt"
+
+	"github.com/ndk123-web/github-activity/internal/models"
+)
 
 type PullEventService interface {
 	GetAllPullRequests() (int64, error)
@@ -31,7 +35,9 @@ func (p *pullEventService) GetPullRequestsRepoWise(limit int64, state string) (m
 	for _, obj := range data {
 		if obj.Type == "PullRequestEvent" {
 			prState := obj.Payload.Action
-			if state == "all" || prState == state {
+			// fmt.Println("prState: ",prState)
+			// fmt.Println("state: ",state)
+			if prState == state {
 				repoName := obj.Repo.Name
 				mapp[repoName]++
 				if int64(len(mapp)) >= limit {

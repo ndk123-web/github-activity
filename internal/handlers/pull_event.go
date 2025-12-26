@@ -44,6 +44,10 @@ func (p *pullHandler) GetPullRequestRepoWise(limit int64, state string, jsonData
 	for repo, prcnt := range mapp {
 		fmt.Printf("- Total Pull Requests that are %s  On Repository: %s is %v\n", state, repo, prcnt)
 	}
+
+	if len(mapp) == 0 {
+		fmt.Printf("- No Pull Requests found with state: %s\n", state)
+	}
 	return nil
 }
 

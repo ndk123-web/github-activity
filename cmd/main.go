@@ -7,6 +7,7 @@ import (
 
 	"os"
 
+	"github.com/ndk123-web/github-activity/internal/config"
 	customerror "github.com/ndk123-web/github-activity/internal/custom-error"
 	"github.com/ndk123-web/github-activity/internal/github"
 	"github.com/ndk123-web/github-activity/internal/handlers"
@@ -23,7 +24,7 @@ func main() {
 	// scopeUser := false
 	// scopeRepo := false
 
-	if len(os.Args) < 4 {
+	if len(os.Args) < 4 && os.Args[1] != "set" && os.Args[1] != "get" {
 		fmt.Println(customerror.Wrap("Insufficient Arguments", errors.New("Insufficient Arguments Error")))
 		return
 	}
@@ -47,7 +48,7 @@ func main() {
 			}
 
 			// get the user url
-			url := fmt.Sprintf("https://api.github.com/users/%s/events", username)
+			url := fmt.Sprintf("https://api.github.com/users/%s/events?per_page=60", username)
 
 			jsonData, err := github.FetchGitHubApiData(url)
 			if err != nil {
@@ -133,7 +134,13 @@ func main() {
 						fmt.Println(customerror.Wrap("State Flag Missing", errors.New("State Flag Missing Error")))
 						return
 					}
+
 					state := flags["--state"]
+
+					if state != "open" && state != "closed" && state != "merged" {
+						fmt.Println(customerror.Wrap("Invalid State Value", errors.New("State Value Should be one of open, closed, merged")))
+						return
+					}
 
 					err := pull_handler.GetAllPullRequests(jsonData)
 					if err != nil {
@@ -156,6 +163,43 @@ func main() {
 		// case "repo": {
 		// 	scopeRepo = true
 		//
+	case "set":
+		{
+			// get the command which will be token
+			currentCommand := os.Args[2]
+			if currentCommand != "token" {
+				fmt.Println(customerror.Wrap("Invalid Command For set", errors.New("Invalid Command Error")))
+				return
+			}
+
+			// data will be i 	n os.Args[3]
+			if len(os.Args) < 4 {
+				fmt.Println(customerror.Wrap("Token Value Missing", errors.New("Token Value Missing Error")))
+				return
+			}
+			tokenValue := os.Args[3]
+
+			config.SetGhToken(tokenValue)
+		}
+
+	case "get":
+		{
+			// get the command which will be token
+			currentCommand := os.Args[2]
+			if currentCommand != "token" {
+				fmt.Println(customerror.Wrap("Invalid Command For get", errors.New("Invalid Command Error")))
+				return
+			}
+			token, err := config.LoadGhToken()
+			if err != nil {
+				fmt.Println(customerror.Wrap("Loading Token Failed", err))
+				return
+			}
+			if token == "" {
+				fmt.Println("- GitHub Token is not set.")
+			}
+			fmt.Println("GitHub Token:", token)
+		}
 	default:
 		{
 			fmt.Println(customerror.Wrap("Scope Not Implemented", errors.New("Scope Not Implemented")))
