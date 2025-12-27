@@ -369,6 +369,6 @@ For internal architecture and extension guidance, see [docs/developer-guide.md](
 
 ## License
 
-MIT
+MIT License. See [LICENSE](LICENSE).
 
 ---
