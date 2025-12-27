@@ -113,7 +113,7 @@ func main() {
 
 			jsonData, err := github.FetchGitHubApiData(url)
 			if err != nil {
-				fmt.Println(customerror.Wrap("Json Issue", err))
+				// fmt.Println(customerror.Wrap("Json Issue", err))
 				return
 			}
 
@@ -320,6 +320,7 @@ func main() {
 			default:
 				{
 					fmt.Println(customerror.Wrap("Command Not Implemented", errors.New("Command Not Implemented")))
+					return
 				}
 			}
 		}

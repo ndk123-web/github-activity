@@ -22,6 +22,7 @@ A lightweight, cross-platform CLI tool to inspect **recent GitHub user activity*
   - [Pushes](#pushes)
   - [Pull Requests](#pull-requests)
   - [Issues](#issues)
+  - [Watches](#watches)
 
 - [Flags](#flags)
 - [Notes](#notes)
@@ -221,6 +222,30 @@ gh-activity user <username> issues --state <open|closed> [--limit N]
 
 - `--state` _(required)_ — `open` or `closed`
 - `--limit` _(optional)_ — Number of results (default: 2)
+
+---
+
+### Watches
+
+View watch/star events grouped by repository.
+
+```bash
+gh-activity user <username> watches [--limit N]
+```
+
+**What it shows:**
+- Count of recent `WatchEvent` per repository for the user’s recent activity window
+- An overview summary and a neat table like other commands
+
+**Flags:**
+
+- `--limit` _(optional)_ — Number of distinct repositories to include (default: 2, max: 50)
+
+**Example:**
+
+```bash
+gh-activity user octocat watches --limit 5
+```
 
 ---
 

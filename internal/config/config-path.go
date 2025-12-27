@@ -33,3 +33,14 @@ func WriteConfigFile(cfg GhTokenConfig, path string) error {
 	data, _ := json.MarshalIndent(cfg, "", "  ")
 	return os.WriteFile(path, []byte(data), 0600)
 }
+
+func DeleteConfigContents() error {
+	path, err := ConfigPath()
+	if err != nil {
+		return err
+	}
+	if err := os.Remove(path); err != nil {
+		return err
+	}
+	return nil
+}
