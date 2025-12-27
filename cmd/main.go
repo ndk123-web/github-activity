@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+
 	// "go/version"
 	"strconv"
 
@@ -16,6 +17,37 @@ import (
 	// "golang.org/x/text/cases"
 )
 
+func printUsage() {
+	fmt.Println("Usage: gh-activity <scope> <username/option> <command> [flags]")
+	fmt.Println("Scopes:")
+	fmt.Println("  - user        Work with a GitHub user’s events")
+	fmt.Println("  - set token   Store your GitHub token")
+	fmt.Println("  - get token   Show your stored GitHub token")
+	fmt.Println("Commands (user scope):")
+	fmt.Println("  - pushes      Show recent push events")
+	fmt.Println("  - pulls       Show recent pull request events (requires --state)")
+	fmt.Println("  - issues      Show recent issue events (requires --state)")
+	fmt.Println("Flags:")
+	fmt.Println("  - --limit <n> Limit the number of results (default: 2, max: 50)")
+	fmt.Println("  - --state <s> For pulls: open|closed|merged; For issues: open|closed")
+}
+
+func printHelp(version string) {
+	fmt.Println("gh-activity — GitHub activity CLI")
+	fmt.Printf("Version: %s\n", version)
+	fmt.Println()
+	printUsage()
+	fmt.Println()
+	fmt.Println("Examples:")
+	fmt.Println("  gh-activity user octocat pushes --limit 10")
+	fmt.Println("  gh-activity user octocat pulls --state open --limit 5")
+	fmt.Println("  gh-activity user octocat issues --state closed --limit 3")
+	fmt.Println("  gh-activity set token <your_token>")
+	fmt.Println("  gh-activity get token")
+	fmt.Println()
+	fmt.Println("Docs: https://github.com/ndk123-web/github-activity/blob/main/Readme.md")
+}
+
 func main() {
 
 	// these are rules
@@ -26,23 +58,34 @@ func main() {
 	// scopeRepo := false
 
 	if len(os.Args) == 1 {
-		fmt.Println("- No Scope , Arguments Provided, \n- Please refer to the documentation: https://ndk123-web.com/github-activity/blob/main/Readme.md")
+		fmt.Println("No arguments provided.")
+		printUsage()
+		fmt.Println("Tip: run gh-activity --help for detailed help.")
 		return
 	}
 
 	// for version info
 	version := "v1.0.0"
-	if len(os.Args) < 3 {
-		if os.Args[1] == "version" || os.Args[1] == "--version" || os.Args[1] == "-v" {
-			fmt.Printf("gh-activity version: %s\n", version)
-			return
-		}
+	if len(os.Args) >= 2 && (os.Args[1] == "version" || os.Args[1] == "--version" || os.Args[1] == "-v") {
+		fmt.Printf("gh-activity version: %s\n", version)
+		return
 	}
 
-	fmt.Println("Os args", os.Args)
+	// for help info
+	if os.Args[1] == "help" || os.Args[1] == "--help" || os.Args[1] == "-h" {
+		printHelp(version)
+		return
+	}
+
+	// fmt.Println("Os args", os.Args)
 
 	if len(os.Args) < 4 && os.Args[1] != "set" && os.Args[1] != "get" {
-		fmt.Println(customerror.Wrap("Insufficient Arguments", errors.New("Insufficient Arguments Error")))
+		fmt.Println(customerror.Wrap("Insufficient Arguments", errors.New("Expected: <scope> <username> <command> [flags]")))
+		printUsage()
+		fmt.Println()
+		fmt.Println("Examples:")
+		fmt.Println("  gh-activity user octocat pushes --limit 10")
+		fmt.Println("  gh-activity user octocat pulls --state open --limit 5")
 		return
 	}
 

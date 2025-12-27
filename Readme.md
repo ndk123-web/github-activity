@@ -1,213 +1,255 @@
-# GitHub Activity CLI Tool
+# gh-activity
 
-A command-line tool to fetch and display GitHub user activity in a simple and organized way.
+A lightweight, cross-platform CLI tool to inspect **recent GitHub user activity** using GitHub’s public Events API.
 
-## What This Tool Does
-
-This CLI tool helps you see what a GitHub user has been doing - their pushes, pull requests, and issues. You can filter and limit the results according to your needs.
-
-## Features Implemented
-
-### 1. **User Scope** (`user`)
-Get information about a specific GitHub user's activity.
-
-#### a) Push Events (`pushes`)
-- Shows all push events by the user
-- Displays pushes organized by repository
-- Optional: Limit the number of results
-
-**Example:**
-```bash
-gh-activity user username pushes
-gh-activity user username pushes --limit 5
-```
-
-#### b) Pull Requests (`pulls`)
-- Shows all pull request activity
-- Filters by state (open, closed, merged)
-- Displays PRs organized by repository
-- Optional: Limit the number of results
-
-**Example:**
-```bash
-gh-activity user username pulls --state open
-gh-activity user username pulls --state merged --limit 5
-```
-
-#### c) Issues (`issues`)
-- Shows all issue activity
-- Filters by state (open, closed)
-- Displays issues organized by repository
-- Optional: Limit the number of results
-
-**Example:**
-```bash
-gh-activity user username issues --state open
-gh-activity user username issues --state closed --limit 10
-```
-
-### 2. **Set GitHub Token** (`set token`)
-Save your GitHub personal access token securely in your home directory.
-
-**Example:**
-```bash
-gh-activity set token your_github_token_here
-```
-
-**What happens:**
-- Token is saved in `~/.gh-activity/config.json`
-- File permissions are set to secure (0600)
-- Timestamp is recorded when token was set
-- You'll get a warning if token is older than 90 days
-
-### 3. **Get GitHub Token** (`get token`)
-View your currently saved GitHub token.
-
-**Example:**
-```bash
-gh-activity get token
-```
-
-### 4. **Version Info**
-Check the version of the tool.
-
-**Example:**
-```bash
-gh-activity version
-gh-activity --version
-gh-activity -v
-```
-
-## Available Commands
-
-| Scope | Command | Required Flags | Optional Flags | Description |
-|-------|---------|----------------|----------------|-------------|
-| `user` | `pushes` | - | `--limit` | Get push events |
-| `user` | `pulls` | `--state` | `--limit` | Get pull requests |
-| `user` | `issues` | `--state` | `--limit` | Get issues |
-| `set` | `token` | - | - | Set GitHub token |
-| `get` | `token` | - | - | Get saved token |
-
-## Flags Explained
-
-### `--limit`
-- Controls how many results to show
-- **Default:** 2
-- **Maximum for issues:** 50
-- **Example:** `--limit 10`
-
-### `--state`
-- Filters results by state
-- **For pulls:** `open`, `closed`, `merged`
-- **For issues:** `open`, `closed`
-- **Required** for pulls and issues commands
-
-## How to Use
-
-### Basic Structure
-```bash
-gh-activity <scope> <command> [flags]
-```
-
-### Examples
-
-1. **See recent pushes of a user:**
-```bash
-gh-activity user octocat pushes
-```
-
-2. **See open pull requests with limit:**
-```bash
-gh-activity user octocat pulls --state open --limit 5
-```
-
-3. **See closed issues:**
-```bash
-gh-activity user octocat issues --state closed --limit 10
-```
-
-4. **Save your GitHub token:**
-```bash
-gh-activity set token ghp_yourTokenHere
-```
-
-5. **Check saved token:**
-```bash
-gh-activity get token
-```
-
-## Project Structure
-
-```
-github-activity/
-├── cmd/
-│   └── main.go                 # Main entry point
-├── internal/
-│   ├── config/
-│   │   ├── config-path.go     # Config file path management
-│   │   └── gh-token.go        # Token storage and retrieval
-│   ├── custom-error/
-│   │   └── global_error.go    # Custom error handling
-│   ├── github/
-│   │   ├── events.go          # GitHub API interaction
-│   │   └── valid_scope.go     # Scope and command validation
-│   ├── handlers/
-│   │   ├── issue_event.go     # Issue event handler
-│   │   ├── pull_event.go      # Pull request handler
-│   │   └── push_event.go      # Push event handler
-│   ├── models/
-│   │   ├── event_model.go     # Event data models
-│   │   └── rules.go           # Command rules and scopes
-│   └── services/
-│       ├── issue_event.go     # Issue processing service
-│       ├── pull_event.go      # Pull request processing service
-│       └── push_event.go      # Push processing service
-├── go.mod
-└── README.md
-```
-
-## Error Handling
-
-The tool provides clear error messages for:
-- Missing arguments
-- Invalid scope or commands
-- Invalid flags
-- Missing required flags
-- Token issues
-- API errors
-
-## Security Features
-
-- GitHub token is stored securely with restricted file permissions (0600)
-- Token age warning (90 days)
-- Timestamp tracking for token creation
-
-## Current Version
-
-**v1.0.0**
-
-## Technical Details
-
-- **Language:** Go 1.25.3
-- **API:** GitHub REST API v3
-- **Default API Limit:** 60 events per user
-- **Config Location:** `~/.gh-activity/config.json`
-
-## Notes
-
-- Default limit for all commands is 2 results
-- Maximum limit for issues is 50
-- Token storage location: `~/.gh-activity/config.json`
-- The tool fetches up to 60 recent events from GitHub API
-
-## Future Scope
-
-- Repository scope (`repo`) with info command
-- More filters and sorting options
-- Support for organizations
-- Enhanced formatting and colors
+`gh-activity` is designed for developers who want **quick, readable insights** into pushes, pull requests, and issues — directly from the terminal.
 
 ---
 
-**Developer:** github.com/ndk123-web  
-**Project:** github-activity
+## Table of Contents
+
+- [Get Started](#get-started)
+- [Installation](#installation)
+
+  - [Windows](#windows)
+  - [Linux](#linux)
+  - [macOS](#macos)
+
+- [Authentication](#authentication)
+- [Usage](#usage)
+
+  - [Scopes & Commands](#scopes--commands)
+  - [Pushes](#pushes)
+  - [Pull Requests](#pull-requests)
+  - [Issues](#issues)
+
+- [Flags](#flags)
+- [Notes](#notes)
+- [Roadmap](#roadmap)
+- [License](#license)
+
+---
+
+## Get Started
+
+`gh-activity` is shipped as a **single self-contained binary**.
+
+You download the release for your operating system, add it to your `PATH`, and start using it immediately — **no Go installation required**.
+
+---
+
+## Installation
+
+Releases are distributed as **ZIP archives** that already contain the correctly named binary inside a `bin/` directory.
+
+### General Structure (inside the archive)
+
+```
+gh-activity/
+└── bin/
+    └── gh-activity        (or gh-activity.exe on Windows)
+```
+
+You only need to add the `bin/` directory to your system `PATH`.
+
+---
+
+### Windows
+
+1. Download the latest release:
+
+```
+gh-activity-windows-amd64.zip
+```
+
+2. Extract the archive
+3. Add the extracted `bin` folder to **Environment Variables → PATH**
+4. Open a new terminal and verify:
+
+```bash
+gh-activity --help
+```
+
+---
+
+### Linux
+
+1. Download:
+
+```
+gh-activity-linux-amd64.zip
+```
+
+2. Extract:
+
+```bash
+unzip gh-activity-linux-amd64.zip
+```
+
+3. Add `bin/` to PATH:
+
+```bash
+export PATH=$PATH:/path/to/gh-activity/bin
+```
+
+4. (Optional) If the binary is not executable:
+
+```bash
+chmod +x gh-activity
+```
+
+5. Verify:
+
+```bash
+gh-activity --help
+```
+
+---
+
+### macOS
+
+1. Download the correct archive:
+
+- Intel: `gh-activity-darwin-amd64.zip`
+- Apple Silicon: `gh-activity-darwin-arm64.zip`
+
+2. Extract:
+
+```bash
+unzip gh-activity-darwin-amd64.zip
+```
+
+3. Add `bin/` to PATH
+
+4. (Optional) If the binary is not executable:
+
+```bash
+chmod +x gh-activity
+```
+
+5. Verify:
+
+```bash
+gh-activity --help
+```
+
+---
+
+## Authentication
+
+GitHub’s public API is rate-limited.
+To avoid rate limits, you can set a **GitHub Personal Access Token**.
+
+```bash
+gh-activity set token <your-token>
+```
+
+### What happens internally
+
+- Token is stored locally at:
+
+```
+~/.gh-activity/config.json
+```
+
+- File permissions are restricted (`0600`)
+- A timestamp is recorded
+- You’ll receive a warning if the token is older than 90 days
+
+To view the saved token:
+
+```bash
+gh-activity get token
+```
+
+---
+
+## Usage
+
+### Scopes & Commands
+
+The CLI follows a **strict positional structure**:
+
+```bash
+gh-activity <scope> <entity> <command> [flags]
+```
+
+Currently supported scope:
+
+- `user`
+
+---
+
+### Pushes
+
+View recent push activity by a user, grouped by repository.
+
+```bash
+gh-activity user <username> pushes [--limit N]
+```
+
+**Flags:**
+
+- `--limit` _(optional)_ — Number of recent push events (default: 2)
+
+---
+
+### Pull Requests
+
+View pull request activity filtered by state.
+
+```bash
+gh-activity user <username> pulls --state <open|closed|merged> [--limit N]
+```
+
+**Flags:**
+
+- `--state` _(required)_ — `open`, `closed`, or `merged`
+- `--limit` _(optional)_ — Number of results (default: 2)
+
+---
+
+### Issues
+
+View issue activity (pull requests are automatically excluded).
+
+```bash
+gh-activity user <username> issues --state <open|closed> [--limit N]
+```
+
+**Flags:**
+
+- `--state` _(required)_ — `open` or `closed`
+- `--limit` _(optional)_ — Number of results (default: 2)
+
+---
+
+## Flags
+
+### `--limit`
+
+- Controls how many events are displayed
+- Default: `2`
+
+### `--state`
+
+- Required for `pulls` and `issues`
+- Pull requests: `open`, `closed`, `merged`
+- Issues: `open`, `closed`
+
+---
+
+## Notes
+
+- Data is fetched from GitHub’s **Events API**
+- Events are **recent activity only** (not full history)
+- One push event ≠ one commit
+- Output is optimized for terminal readability and scripting
+
+---
+
+## License
+
+MIT
+
+---
