@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	// "go/version"
 	"strconv"
 
 	"os"
@@ -23,6 +24,22 @@ func main() {
 
 	// scopeUser := false
 	// scopeRepo := false
+
+	if len(os.Args) == 1 {
+		fmt.Println("- No Scope , Arguments Provided, \n- Please refer to the documentation: https://ndk123-web.com/github-activity/blob/main/Readme.md")
+		return
+	}
+
+	// for version info
+	version := "v1.0.0"
+	if len(os.Args) < 3 {
+		if os.Args[1] == "version" || os.Args[1] == "--version" || os.Args[1] == "-v" {
+			fmt.Printf("gh-activity version: %s\n", version)
+			return
+		}
+	}
+
+	fmt.Println("Os args", os.Args)
 
 	if len(os.Args) < 4 && os.Args[1] != "set" && os.Args[1] != "get" {
 		fmt.Println(customerror.Wrap("Insufficient Arguments", errors.New("Insufficient Arguments Error")))
@@ -178,7 +195,7 @@ func main() {
 
 					state := flags["--state"]
 
-					// validate state 
+					// validate state
 					if state != "open" && state != "closed" {
 						fmt.Println(customerror.Wrap("Invalid State Value", errors.New("State Value Should be one of open, closed")))
 						return
