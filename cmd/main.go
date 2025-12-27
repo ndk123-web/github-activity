@@ -109,7 +109,7 @@ func main() {
 			}
 
 			// get the user url
-			url := fmt.Sprintf("https://api.github.com/users/%s/events?per_page=60", username)
+			url := fmt.Sprintf("https://api.github.com/users/%s/events?per_page=100", username)
 
 			jsonData, err := github.FetchGitHubApiData(url)
 			if err != nil {
@@ -314,6 +314,43 @@ func main() {
 					err := watchHandler.GetAllWatchEvent(jsonData, limit)
 					if err != nil {
 						fmt.Println(customerror.Wrap("Watch Handler Issue", err))
+						return
+					}
+				}
+			case "summary":
+				{
+					summaryHandler := handlers.NewSummaryAllHandler(url)
+
+					// get limit
+					var limit int64 = 0 // default value
+					limitProvided := false
+					if l, ok := flags["--limit"]; ok {
+						limit, err = strconv.ParseInt(l, 10, 64)
+						if err != nil {
+							fmt.Println(customerror.Wrap("Limit Flag Parsing Issue", err))
+							return
+						}
+						limitProvided = true
+					}
+
+					// set default limit if limit is zero
+					if limit == 0 {
+						limit = 2
+					}
+
+					if !limitProvided {
+						fmt.Println("🚧 Default limit is 2. To see more, use --limit flag: Example: --limit 20")
+					}
+
+					if limit > 50 {
+						fmt.Println(customerror.Wrap("Limit Exceeds Maximum", errors.New("Limit cannot be more than 50")))
+						limit = 50
+						fmt.Println("Setting limit to 50")
+					}
+
+					err := summaryHandler.GetAllSummary(limit, jsonData)
+					if err != nil {
+						fmt.Println(customerror.Wrap("Summary Handler Issue", err))
 						return
 					}
 				}

@@ -7,6 +7,7 @@ func Rules() map[string]map[string][]string {
 			"pulls":   {"--limit", "--state"},
 			"issues":  {"--limit", "--state"},
 			"watches": {"--limit"},
+			"summary": {"--limit"},
 		},
 		"repo": {
 			"info": {},

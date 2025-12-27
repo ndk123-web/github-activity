@@ -138,9 +138,22 @@ gh-activity --help
 
 ## Authentication
 
-GitHub’s public API is rate-limited.
-To avoid rate limits, you can set a **GitHub Personal Access Token**.
+### 🔐 Creating a GitHub Personal Access Token
 
+To avoid API rate limits, you can create a **GitHub Personal Access Token**.
+
+1. Go to **GitHub → Settings**
+2. Open **Developer settings** (left sidebar)
+3. Click **Personal access tokens**
+4. Select **Tokens (classic)**
+5. Click **Generate new token**
+6. Give it a name (e.g. `gh-activity`)
+7. Select scopes:
+
+   * ✅ `public_repo` *(recommended)*
+8. Generate the token and **copy it immediately**
+
+Then set it in the CLI:
 ```bash
 gh-activity set token <your-token>
 ```
