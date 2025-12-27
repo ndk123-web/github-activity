@@ -27,6 +27,7 @@ func printUsage() {
 	fmt.Println("  - pushes      Show recent push events")
 	fmt.Println("  - pulls       Show recent pull request events (requires --state)")
 	fmt.Println("  - issues      Show recent issue events (requires --state)")
+	fmt.Println("  - watches     Show watch/star events per repository")
 	fmt.Println("Flags:")
 	fmt.Println("  - --limit <n> Limit the number of results (default: 2, max: 50)")
 	fmt.Println("  - --state <s> For pulls: open|closed|merged; For issues: open|closed")
@@ -276,6 +277,43 @@ func main() {
 					}
 					if err := issue_handler.GetIssueByState(state, limit, jsonData); err != nil {
 						fmt.Println(customerror.Wrap("Issue Handler Issue", err))
+						return
+					}
+				}
+			case "watches":
+				{
+					watchHandler := handlers.NewWatchEventHandler(url)
+
+					// get limit
+					var limit int64 = 0 // default value
+					limitProvided := false
+					if l, ok := flags["--limit"]; ok {
+						limit, err = strconv.ParseInt(l, 10, 64)
+						if err != nil {
+							fmt.Println(customerror.Wrap("Limit Flag Parsing Issue", err))
+							return
+						}
+						limitProvided = true
+					}
+
+					// set default limit if limit is zero
+					if limit == 0 {
+						limit = 2
+					}
+
+					if !limitProvided {
+						fmt.Println("🚧 Default limit is 2. To see more, use --limit flag: Example: --limit 20")
+					}
+
+					if limit > 50 {
+						fmt.Println(customerror.Wrap("Limit Exceeds Maximum", errors.New("Limit cannot be more than 50")))
+						limit = 50
+						fmt.Println("Setting limit to 50")
+					}
+
+					err := watchHandler.GetAllWatchEvent(jsonData, limit)
+					if err != nil {
+						fmt.Println(customerror.Wrap("Watch Handler Issue", err))
 						return
 					}
 				}
