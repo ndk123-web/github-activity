@@ -26,6 +26,7 @@ A lightweight, cross-platform CLI tool to inspect **recent GitHub user activity*
   - [Summary](#summary)
 
 - [Flags](#flags)
+- [Summary](#summary)
 - [Notes](#notes)
 - [Roadmap](#roadmap)
 - [License](#license)
@@ -316,6 +317,46 @@ spf13/cobra                    1 events
 - Issues: `open`, `closed`
 
 ---
+
+## Summary
+
+Generate a combined summary of recent activity for a user (pushes, pull requests, issues, watches) with clean, tabular counts and an aggregated top repositories list.
+
+### Command
+
+```bash
+gh-activity user <username> summary [--limit N]
+```
+
+### Sample Output
+
+```
+📊 Activity Summary (last 10 events)
+
+Metric                     Count
+Total Events               54
+Total Push Events          45
+Total Pull Request Events  2
+Total Issues Events        2
+Total Watch Events         5
+
+Top Repositories (by total activity):
+------------------------------------------
+ndk123-web/DSA                 21 events
+ndk123-web/github-activity     20 events
+ndk123-web/observability-learning 4 events
+ndk123-web/study-sync-ai       4 events
+spf13/cobra                    1 events
+```
+
+### `--limit` semantics
+
+- Current behavior: `--limit N` caps the number of distinct repositories included per event type (pushes, pulls, issues, watches). It does not limit the total events processed globally.
+- If you prefer `--limit` to mean “process only the last N events overall”, open an issue — this can be switched to a global event cap.
+
+---
+
+For internal architecture and extension guidance, see [docs/developer-guide.md](docs/developer-guide.md).
 
 ## Notes
 
