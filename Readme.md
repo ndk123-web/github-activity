@@ -23,6 +23,7 @@ A lightweight, cross-platform CLI tool to inspect **recent GitHub user activity*
   - [Pull Requests](#pull-requests)
   - [Issues](#issues)
   - [Watches](#watches)
+  - [Summary](#summary)
 
 - [Flags](#flags)
 - [Notes](#notes)
@@ -150,10 +151,12 @@ To avoid API rate limits, you can create a **GitHub Personal Access Token**.
 6. Give it a name (e.g. `gh-activity`)
 7. Select scopes:
 
-   * ✅ `public_repo` *(recommended)*
+   - ✅ `public_repo` _(recommended)_
+
 8. Generate the token and **copy it immediately**
 
 Then set it in the CLI:
+
 ```bash
 gh-activity set token <your-token>
 ```
@@ -247,6 +250,7 @@ gh-activity user <username> watches [--limit N]
 ```
 
 **What it shows:**
+
 - Count of recent `WatchEvent` per repository for the user’s recent activity window
 - An overview summary and a neat table like other commands
 
@@ -259,6 +263,42 @@ gh-activity user <username> watches [--limit N]
 ```bash
 gh-activity user octocat watches --limit 5
 ```
+
+## Summary
+
+Generate a combined summary of recent activity for a user (pushes, pull requests, issues, watches) with clean, tabular counts and an aggregated top repositories list.
+
+### Command
+
+```bash
+gh-activity user <username> summary [--limit N]
+```
+
+### Sample Output
+
+```
+📊 Activity Summary (last 10 events)
+
+Metric                     Count
+Total Events               54
+Total Push Events          45
+Total Pull Request Events  2
+Total Issues Events        2
+Total Watch Events         5
+
+Top Repositories (by total activity):
+------------------------------------------
+ndk123-web/DSA                 21 events
+ndk123-web/github-activity     20 events
+ndk123-web/observability-learning 4 events
+ndk123-web/study-sync-ai       4 events
+spf13/cobra                    1 events
+```
+
+### `--limit` semantics
+
+- Current behavior: `--limit N` caps the number of distinct repositories included per event type (pushes, pulls, issues, watches). It does not limit the total events processed globally.
+- If you prefer `--limit` to mean “process only the last N events overall”, open an issue — this can be switched to a global event cap.
 
 ---
 
