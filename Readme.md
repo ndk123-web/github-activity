@@ -34,7 +34,6 @@ A lightweight, cross-platform CLI tool to inspect **recent GitHub user activity*
 
 - [Flags](#flags)
 - [Notes](#notes)
-- [Roadmap](#roadmap)
 - [License](#license)
 
 ---
