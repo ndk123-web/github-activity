@@ -1,4 +1,10 @@
-# gh-activity
+<p align="center">
+  <img src="public/gh-activitiy-logo.jpeg" alt="gh-activity logo" width="200" height="200" style="border-radius: 50%; object-fit: cover;" />
+</p>
+
+<p align="center">
+ <h1 align="center">github activity</h1>
+</p>
 
 A lightweight, cross-platform CLI tool to inspect **recent GitHub user activity** using GitHub’s public Events API.
 
