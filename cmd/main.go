@@ -401,6 +401,90 @@ func main() {
 			}
 			fmt.Println("GitHub Token:", token)
 		}
+	case "repo":
+		{
+			// gh-activity repo {repoName} info --limit {N}
+			repoName := os.Args[2]
+			currentCommand := os.Args[3]
+			if !github.IsValidCommand(currentCommand, rules, currentScope) {
+				fmt.Println(customerror.Wrap(fmt.Sprintf("Invalid Scope For %s", currentScope), fmt.Errorf(fmt.Sprintf("Invalid Command %s", currentCommand))))
+				return
+			}
+			flags := make(map[string]string)
+			// process flags if any
+			if len(os.Args) > 4 {
+				// verify that each flag has an accompanying value
+				if (len(os.Args)-4)%2 != 0 {
+					fmt.Println(customerror.Wrap("Some Flag Data Missing", errors.New("Flag Data Missing Error")))
+					return
+				}
+				// process flags as pairs: flag then value
+				for i := 4; i < len(os.Args); i += 2 {
+					currentFlag := os.Args[i]
+					if !github.IsValidFlag(currentFlag, rules[currentScope][currentCommand]) {
+						fmt.Println(customerror.Wrap(fmt.Sprintf("Invalid Flag For %s", currentCommand), fmt.Errorf(fmt.Sprintf("Invalid Flag %s", currentFlag))))
+						return
+					}
+					flags[currentFlag] = os.Args[i+1]
+				}
+			}
+
+			switch currentCommand {
+			case "info":
+				{
+					url := fmt.Sprintf("https://api.github.com/repos/%s", repoName)
+					jsonData, err := github.FetchGithubRepoApi(url)
+					if err != nil {
+						fmt.Println(customerror.Wrap("Fetching Repo Info Failed", err))
+						return
+					}
+
+					var limit int64 = 0 // default value
+					limitProvided := false
+
+					if l, ok := flags["--limit"]; ok {
+						limit, err = strconv.ParseInt(l, 10, 64)
+						if err != nil {
+							fmt.Println(customerror.Wrap("Limit Flag Parsing Issue", err))
+							return
+						}
+						limitProvided = true
+					}
+
+					// set default limit if limit is zero
+					if limit == 0 {
+						limit = 2
+					}
+
+					if !limitProvided {
+						fmt.Println("🚧 Default limit is 2. To see more, use --limit flag: Example: --limit 20")
+					}
+
+					repoHandler := handlers.NewRepoHandler(url)
+					if err := repoHandler.HandleInfoRepo(limit, jsonData); err != nil {
+						fmt.Println(customerror.Wrap("Repo Handler Issue", err))
+						return
+					}
+
+					url = fmt.Sprintf("https://api.github.com/repos/%s/events?per_page=100", repoName)
+
+					repoEventsData, err := github.FetchGitHubApiData(url)
+					if err != nil {
+						fmt.Println(customerror.Wrap("Fetching Repo Events Info Failed", err))
+						return
+					}
+
+					if err := repoHandler.HandleInfoRepoEvents(limit, repoEventsData, repoName); err != nil {
+						fmt.Println(customerror.Wrap("Repo Events Handler Issue", err))
+						return
+					}
+				}
+			default:
+				{
+					fmt.Println(customerror.Wrap("Command Not Implemented", errors.New("Command Not Implemented")))
+				}
+			}
+		}
 	default:
 		{
 			fmt.Println(customerror.Wrap("Scope Not Implemented", errors.New("Scope Not Implemented")))

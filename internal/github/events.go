@@ -130,3 +130,53 @@ func FetchGitHubApiData(url string) ([]models.GitResponseObject, error) {
 
 	// return jsonData, nil
 }
+
+func FetchGithubRepoApi(url string) (models.RepoObject, error) {
+
+	token, err := config.LoadGhToken()
+
+	if err != nil {
+		// fmt.Println("Error loading GitHub Token")
+	}
+	if token != "" {
+		// IsUsingGhToken = true
+		fmt.Println("- Using GitHub Token for authentication.")
+	} else {
+		fmt.Println("- No GitHub Token found. Proceeding without authentication.")
+	}
+
+	client := &http.Client{}
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		fmt.Println(customerror.Wrap("creating http request failed", err).Error())
+		return models.RepoObject{}, err
+	}
+
+	if token != "" {
+		req.Header.Add("Authorization", "Bearer "+token)
+	}
+	
+	response, err := client.Do(req)
+	if err != nil {
+		fmt.Println(customerror.Wrap("http get failed", err).Error())
+		return models.RepoObject{}, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(response.Body)
+		return models.RepoObject{}, fmt.Errorf("github api error: status=%d body=%s", response.StatusCode, string(body))
+	}
+	dataa, err := io.ReadAll(response.Body)
+	if err != nil {
+		fmt.Println(customerror.Wrap("reading response body failed", err).Error())
+		return models.RepoObject{}, err
+	}
+	var jsonData models.RepoObject
+	if err := json.Unmarshal(dataa, &jsonData); err != nil {
+		fmt.Println(customerror.Wrap("json unmarshal failed", err).Error())
+		return models.RepoObject{}, err
+	}
+	return jsonData, nil
+}

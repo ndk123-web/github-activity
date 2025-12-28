@@ -10,7 +10,7 @@ func Rules() map[string]map[string][]string {
 			"summary": {"--limit"},
 		},
 		"repo": {
-			"info": {},
+			"info": {"--limit"},
 		},
 		"set": {
 			"token": {},
