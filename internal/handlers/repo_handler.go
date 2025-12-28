@@ -9,6 +9,22 @@ import (
 	"github.com/ndk123-web/github-activity/internal/services"
 )
 
+// truncateString reduces long strings to a max length with ellipsis.
+func truncateString(s string, max int) string {
+	if max <= 0 {
+		return s
+	}
+	// operate on runes to avoid breaking multibyte characters
+	r := []rune(s)
+	if len(r) > max {
+		if max > 1 {
+			return string(r[:max-1]) + "…"
+		}
+		return string(r[:max])
+	}
+	return s
+}
+
 type RepoHandler interface {
 	HandleInfoRepo(limit int64, jsonData models.RepoObject) error
 	HandleInfoRepoEvents(limit int64, jsonData []models.GitResponseObject, repoName string) error
@@ -29,10 +45,14 @@ func (r *repoHandler) HandleInfoRepo(limit int64, jsonData models.RepoObject) er
 
 	fmt.Printf("\n📦 Repository Info\n\n")
 
-	desc := mapp.Description
-	if strings.TrimSpace(desc) == "" {
+	// Normalize description (collapse whitespace/newlines)
+	rawDesc := mapp.Description
+	desc := strings.TrimSpace(strings.Join(strings.Fields(rawDesc), " "))
+	if desc == "" {
 		desc = "—"
 	}
+	// limit to avoid awkward wrap in value column
+	desc = truncateString(desc, 90)
 
 	// Build topics display as bracketed tags
 	topicsDisplay := "—"
@@ -54,7 +74,8 @@ func (r *repoHandler) HandleInfoRepo(limit int64, jsonData models.RepoObject) er
 	fieldHeader := "FIELD"
 	valueHeader := "VALUE"
 	maxFieldLen := len(fieldHeader)
-	labels := []string{"Name", "Description", "Primary Language", "License", "Topics", "Visibility", "Forks", "Stars"}
+	// Align row order to requested sequence
+	labels := []string{"Name", "Description", "Primary Language", "License", "Visibility", "Stars", "Forks", "Open Issues", "Created", "Last Updated", "Last Push", "Topics"}
 	for _, l := range labels {
 		if len(l) > maxFieldLen {
 			maxFieldLen = len(l)
@@ -73,12 +94,9 @@ func (r *repoHandler) HandleInfoRepo(limit int64, jsonData models.RepoObject) er
 	fmt.Printf("%-*s  %s\n", fieldWidth, "Description", desc)
 	fmt.Printf("%-*s  %s\n", fieldWidth, "Primary Language", mapp.Language)
 	fmt.Printf("%-*s  %s\n", fieldWidth, "License", mapp.Licence.Name)
-	fmt.Printf("%-*s  %s\n", fieldWidth, "Topics", topicsDisplay)
-
 	fmt.Printf("%-*s  %s\n", fieldWidth, "Visibility", mapp.Visibility)
-	fmt.Printf("%-*s  %d\n", fieldWidth, "Forks", mapp.Forks)
 	fmt.Printf("%-*s  %d\n", fieldWidth, "Stars", mapp.Stars)
-
+	fmt.Printf("%-*s  %d\n", fieldWidth, "Forks", mapp.Forks)
 	fmt.Printf("%-*s  %d\n", fieldWidth, "Open Issues", mapp.OpenIssues)
 
 	t1, err := time.Parse(time.RFC3339, mapp.CreatedAt)
@@ -102,6 +120,9 @@ func (r *repoHandler) HandleInfoRepo(limit int64, jsonData models.RepoObject) er
 	t3 = t3.Local()
 	fmt.Printf("%-*s  %s\n", fieldWidth, "Last Push", t3.Format("2006-01-02"))
 
+	// Topics last per requested structure
+	fmt.Printf("%-*s  %s\n", fieldWidth, "Topics", topicsDisplay)
+
 	return nil
 }
 
@@ -117,7 +138,8 @@ func (r *repoHandler) HandleInfoRepoEvents(limit int64, jsonData []models.GitRes
 	// Two-column table: EVENT | COUNT
 	eventHeader := "EVENT"
 	countHeader := "COUNT"
-	labels := []string{"Push Events", "Watch Events", "Pull Requests", "Issues"}
+	// Align events order: Push, Issues, Watch, Pull Requests
+	labels := []string{"Push Events", "Issues", "Watch Events", "Pull Requests"}
 	maxLabelLen := len(eventHeader)
 	for _, l := range labels {
 		if len(l) > maxLabelLen {
@@ -133,9 +155,9 @@ func (r *repoHandler) HandleInfoRepoEvents(limit int64, jsonData []models.GitRes
 	fmt.Printf("%s  %s\n", strings.Repeat("-", eventWidth), strings.Repeat("-", countWidth))
 
 	fmt.Printf("%-*s  %*d\n", eventWidth, "Push Events", countWidth, response.PushEvents)
+	fmt.Printf("%-*s  %*d\n", eventWidth, "Issues", countWidth, response.IssueEventService)
 	fmt.Printf("%-*s  %*d\n", eventWidth, "Watch Events", countWidth, response.WatchEvents)
 	fmt.Printf("%-*s  %*d\n", eventWidth, "Pull Requests", countWidth, response.PullEventService)
-	fmt.Printf("%-*s  %*d\n", eventWidth, "Issues", countWidth, response.IssueEventService)
 
 	fmt.Println()
 	return nil

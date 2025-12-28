@@ -17,6 +17,8 @@ import (
 	customerror "github.com/ndk123-web/github-activity/internal/custom-error"
 
 	// "github.com/ndk123-web/github-activity/internal/handlers"
+	"sync"
+
 	"github.com/ndk123-web/github-activity/internal/models"
 )
 
@@ -35,12 +37,7 @@ func FetchGitHubApiData(url string) ([]models.GitResponseObject, error) {
 	if err != nil {
 		// fmt.Println("Error loading GitHub Token")
 	}
-	if token != "" {
-		// IsUsingGhToken = true
-		fmt.Println("- Using GitHub Token for authentication.")
-	} else {
-		fmt.Println("- No GitHub Token found. Proceeding without authentication.")
-	}
+	printAuthMessage(token)
 
 	client := &http.Client{}
 
@@ -138,12 +135,7 @@ func FetchGithubRepoApi(url string) (models.RepoObject, error) {
 	if err != nil {
 		// fmt.Println("Error loading GitHub Token")
 	}
-	if token != "" {
-		// IsUsingGhToken = true
-		fmt.Println("- Using GitHub Token for authentication.")
-	} else {
-		fmt.Println("- No GitHub Token found. Proceeding without authentication.")
-	}
+	printAuthMessage(token)
 
 	client := &http.Client{}
 
@@ -156,7 +148,7 @@ func FetchGithubRepoApi(url string) (models.RepoObject, error) {
 	if token != "" {
 		req.Header.Add("Authorization", "Bearer "+token)
 	}
-	
+
 	response, err := client.Do(req)
 	if err != nil {
 		fmt.Println(customerror.Wrap("http get failed", err).Error())
@@ -179,4 +171,17 @@ func FetchGithubRepoApi(url string) (models.RepoObject, error) {
 		return models.RepoObject{}, err
 	}
 	return jsonData, nil
+}
+
+// ensure auth message is printed only once per process
+var authMsgOnce sync.Once
+
+func printAuthMessage(token string) {
+	authMsgOnce.Do(func() {
+		if token != "" {
+			fmt.Println("- Using GitHub Token for authentication.")
+		} else {
+			fmt.Println("- No GitHub Token found. Proceeding without authentication.")
+		}
+	})
 }
