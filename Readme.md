@@ -25,6 +25,7 @@ A lightweight, cross-platform CLI tool to inspect **recent GitHub user activity*
 - [Usage](#usage)
 
   - [Scopes & Commands](#scopes--commands)
+  - [Repository](#repository)
   - [Pushes](#pushes)
   - [Pull Requests](#pull-requests)
   - [Issues](#issues)
@@ -32,7 +33,6 @@ A lightweight, cross-platform CLI tool to inspect **recent GitHub user activity*
   - [Summary](#summary)
 
 - [Flags](#flags)
-- [Summary](#summary)
 - [Notes](#notes)
 - [Roadmap](#roadmap)
 - [License](#license)
@@ -184,6 +184,12 @@ To view the saved token:
 
 ```bash
 gh-activity get token
+
+### Authentication behavior
+
+- The CLI prints a single auth status message once per run (token vs no token).
+- If GitHub returns “Bad credentials”, the saved token is removed and the request is retried unauthenticated.
+- Unauthenticated requests are rate-limited — set a valid token to avoid hitting limits.
 ```
 
 ---
@@ -198,9 +204,73 @@ The CLI follows a **strict positional structure**:
 gh-activity <scope> <entity> <command> [flags]
 ```
 
-Currently supported scope:
+Currently supported scopes:
 
 - `user`
+- `repo`
+### Repository
+
+View repository metadata and a summary of recent events in one go.
+
+#### Repo Info
+
+```bash
+gh-activity repo <owner>/<repo> info [--limit N]
+```
+
+Shows a two-column table with key fields, followed by a compact events summary.
+
+Field order:
+
+1. Name
+2. Description
+3. Primary Language
+4. License
+5. Visibility
+6. Stars
+7. Forks
+8. Open Issues
+9. Created
+10. Last Updated
+11. Last Push
+12. Topics
+
+Events order: Push, Issues, Watch, Pull Requests.
+
+#### Example
+
+```
+- Using GitHub Token for authentication.
+
+📦 Repository Info
+
+FIELD               VALUE
+------------------  --------------------------------------------
+Name                ndk123-web/github-activity
+Description         A lightweight, cross-platform CLI tool to inspect recent GitHub user activity
+Primary Language    Go
+License             MIT
+Visibility          Public
+Stars               1
+Forks               0
+Open Issues         0
+Created             2025-12-24
+Last Updated        2025-12-28
+Last Push           2025-12-28
+Topics              [cli] [command-line-tool] [cross-platform] [golang] [tool]
+
+📦 Repository Events (recent)
+--------------------
+EVENT          COUNT
+-------------  -----
+Push Events       20
+Issues             2
+Watch Events       1
+Pull Requests      0
+```
+
+`--limit` controls the number of recent events considered when building the summary.
+
 
 ---
 
@@ -370,6 +440,11 @@ For internal architecture and extension guidance, see [docs/developer-guide.md](
 - Events are **recent activity only** (not full history)
 - One push event ≠ one commit
 - Output is optimized for terminal readability and scripting
+
+### Formatting notes
+
+- Long descriptions are normalized (whitespace collapsed) and truncated to avoid breaking table layout.
+- Topic tags render as bracketed labels: `[tag1] [tag2] …`.
 
 ---
 
