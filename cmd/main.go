@@ -66,7 +66,7 @@ func main() {
 	}
 
 	// for version info
-	version := "v1.0.0"
+	version := "v1.0.2"
 	if len(os.Args) >= 2 && (os.Args[1] == "version" || os.Args[1] == "--version" || os.Args[1] == "-v") {
 		fmt.Printf("gh-activity version: %s\n", version)
 		return
