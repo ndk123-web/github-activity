@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/gh-activitiy-logo.jpeg" alt="gh-activity logo" width="200" height="200" style="border-radius: 50%; object-fit: cover;" />
+  <img src="public/gh-activitiy-logo.png" alt="gh-activity logo" width="200" height="200"  />
 </p>
 
 <p align="center">
